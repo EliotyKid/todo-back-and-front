@@ -92,6 +92,32 @@ app.put("/tasks/:id", async (req, res) => {
 });
 
 
+//Delete task
+app.delete("/tasks/:id", async (req, res) => {
+    const { id } = req.params;
+
+    try{
+        if (!id){
+        return res.status(400).json({error: "User ID required."});
+        }
+
+        const query = `DELETE FROM tasks WHERE id = $1 RETURNING *`;
+        const result = await pool.query(query,[id]);
+
+        if ( result.rowCount === 0){
+            return res.status(404).json({ message: "Not found task."});
+        }
+
+        res.status(200).json({
+            message: "Task deleted successfully.",
+            task: result.rows[0]
+        });
+    } catch (err) {
+        console.error("Error to delete task:", err);
+        res.status(500).json({ error: "Internal server error."});
+    }
+
+});
 
 
 //Started server
